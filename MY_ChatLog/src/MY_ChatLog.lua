@@ -80,12 +80,16 @@ end
 function _C.OnFriendMsg(szMsg, nFont, bRich, r, g, b)
 	_C.OnMsg(szMsg, 'MSG_FRIEND', nFont, bRich, r, g, b)
 end
+function _C.OnIdentityMsg(szMsg, nFont, bRich, r, g, b)
+	_C.OnMsg(szMsg, 'MSG_IDENTITY', nFont, bRich, r, g, b)
+end
 
 MY.RegisterInit("MY_CHATLOG_REGMSG", function()
 	MY.RegisterMsgMonitor('MY_ChatLog_Tong'  , _C.OnTongMsg  , { 'MSG_GUILD', 'MSG_GUILD_ALLIANCE' })
 	MY.RegisterMsgMonitor('MY_ChatLog_Wisper', _C.OnWisperMsg, { 'MSG_WHISPER' })
 	MY.RegisterMsgMonitor('MY_ChatLog_Raid'  , _C.OnRaidMsg  , { 'MSG_TEAM', 'MSG_PARTY', 'MSG_GROUP' })
 	MY.RegisterMsgMonitor('MY_ChatLog_Friend', _C.OnFriendMsg, { 'MSG_FRIEND' })
+	MY.RegisterMsgMonitor('MY_ChatLog_Identity', _C.OnIdentityMsg, { 'MSG_IDENTITY' })
 end)
 
 ------------------------------------------------------------------------------------------------------
@@ -212,7 +216,7 @@ span.emotion_44{width:21px; height: 21px; display: inline-block; background-imag
 #controls{background-color: #fff; height: 25px; position: fixed; opacity: 0.92; bottom: 0; left: 0; right: 0}
 #mosaics{width: 200px;height: 20px}
 ]]
-	
+
 	if MY_Farbnamen and MY_Farbnamen.GetForceRgb then
 		for k, v in pairs(g_tStrings.tForceTitle) do
 			szHeader = szHeader .. (".force-%s{color:#%02X%02X%02X}"):format(k, unpack(MY_Farbnamen.GetForceRgb(k)))
@@ -263,13 +267,13 @@ span.emotion_44{width:21px; height: 21px; display: inline-block; background-imag
 		(s = ua.match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] :
 		(s = ua.match(/opera.([\d.]+)/)) ? Sys.opera = s[1] :
 		(s = ua.match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1] : 0;
-		
+
 		// if (Sys.ie) document.write('IE: ' + Sys.ie);
 		// if (Sys.firefox) document.write('Firefox: ' + Sys.firefox);
 		// if (Sys.chrome) document.write('Chrome: ' + Sys.chrome);
 		// if (Sys.opera) document.write('Opera: ' + Sys.opera);
 		// if (Sys.safari) document.write('Safari: ' + Sys.safari);
-		
+
 		if (!Sys.chrome && !Sys.firefox) {
 			document.getElementById("browserWarning").innerHTML = "<a>WARNING: Please use </a><a href='http://www.google.cn/chrome/browser/desktop/index.html' style='color: yellow;'>Chrome</a></a> to browse this page!!!</a>";
 		} else {
@@ -350,7 +354,7 @@ function MY_ChatLog.ExportConfirm()
 		level = "Normal1", text = _L['export chatlog'], alpha = 200,
 	})
 	local btnSure
-	local aChannels = {"MSG_GUILD", "MSG_WHISPER", "MSG_TEAM", "MSG_FRIEND"}
+	local aChannels = {"MSG_GUILD", "MSG_WHISPER", "MSG_TEAM", "MSG_FRIEND", "MSG_IDENTITY"}
 	local tChannels = {}
 	local x, y = 10, 10
 	for i, v in ipairs(aChannels) do
@@ -377,7 +381,7 @@ function MY_ChatLog.ExportConfirm()
 		tChannels[v] = true
 	end
 	y = y + 10
-	
+
 	btnSure = ui:append("WndButton", {
 		x = x, y = y, w = 100,
 		text = _L['export chatlog'],
@@ -592,7 +596,7 @@ function _C.OnPanelActive(wnd)
 	local ui = MY.UI(wnd)
 	local w, h = ui:size()
 	local x, y = 20, 10
-	
+
 	_C.uiLog = ui:append("WndScrollBox", "WndScrollBox_Log", {
 		x = 20, y = 35, w = w - 21, h = h - 40, handlestyle = 3,
 		onscroll = function(nScrollPercent, nScrollDistance)
@@ -602,12 +606,13 @@ function _C.OnPanelActive(wnd)
 			end
 		end,
 	}):children('#WndScrollBox_Log')
-	
+
 	for i, szChannel in ipairs({
 		'MSG_GUILD'  ,
 		'MSG_WHISPER',
 		'MSG_TEAM'   ,
 		'MSG_FRIEND' ,
+		'MSG_IDENTITY',
 	}) do
 		ui:append('WndRadioBox', 'RadioBox_' .. szChannel):children('#RadioBox_' .. szChannel)
 		  :pos(x + (i - 1) * 100, y):width(90)
@@ -621,7 +626,7 @@ function _C.OnPanelActive(wnd)
 		  end)
 		  :check(MY_ChatLog.szActiveChannel == szChannel)
 	end
-	
+
 	ui:append("Image", "Image_Setting"):item('#Image_Setting')
 	  :pos(w - 26, y - 6):size(30, 30):alpha(200)
 	  :image('UI/Image/UICommon/Commonpanel.UITex',18)
@@ -647,7 +652,7 @@ function _C.OnPanelActive(wnd)
 	  			szOption = _L['rebuild date list'],
 	  			fnAction = function()
 	  				_C.RebuildDateList({
-	  					"MSG_GUILD", "MSG_WHISPER", "MSG_TEAM", "MSG_FRIEND"
+	  					"MSG_GUILD", "MSG_WHISPER", "MSG_TEAM", "MSG_FRIEND", "MSG_IDENTITY"
 	  				}, (GetCurrentTime() - 1388505600) / 60 / 60 / 24)
 	  				_C.UiRedrawLog()
 	  			end,
